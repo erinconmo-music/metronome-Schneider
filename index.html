@@ -1,666 +1,330 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html>
+<!DOCTYPE html>
+<html lang="es">
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-  <meta http-equiv="Content-Style-Type" content="text/css">
-  <title></title>
-  <meta name="Generator" content="Cocoa HTML Writer">
-  <meta name="CocoaVersion" content="2685.2">
-  <style type="text/css">
-    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; -webkit-text-stroke: #000000}
-    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; -webkit-text-stroke: #000000; min-height: 14.0px}
-    span.s1 {font-kerning: none}
+  <meta charset="UTF-8">
+  <title>METRONOMO ICZ</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: #020617;
+      --card-bg: #020617;
+      --card-border: #1f2937;
+      --accent: #fc7432;
+      --accent-soft: rgba(252, 116, 50, 0.25);
+      --text-main: #f9fafb;
+      --text-muted: #9ca3af;
+      --track-bg: #111827;
+      --thumb: #f97316;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at top, #111827, #020617);
+      font-family: "Montserrat", system-ui, -apple-system, sans-serif;
+      color: var(--text-main);
+    }
+
+    .metronome-widget {
+      background: var(--card-bg);
+      border-radius: 24px;
+      padding: 20px 22px 18px;
+      width: 340px;
+      max-width: 100%;
+      border: 1px solid var(--card-border);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(15, 23, 42, 0.8);
+    }
+
+    .mw-header { display: flex; justify-content: flex-start; align-items: center; margin-bottom: 12px; }
+    .mw-title-row { display: flex; align-items: center; gap: 10px; }
+    .mw-logo { height: 24px; width: auto; display: block; }
+    .mw-title { font-size: 1.25rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
+
+    .mw-display { display: flex; align-items: baseline; gap: 6px; margin-bottom: 14px; }
+    .mw-bpm-value { font-size: 2.6rem; font-weight: 700; line-height: 1; }
+    .mw-bpm-unit { font-size: 0.9rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; }
+
+    .mw-bpm-controls { display: grid; gap: 8px; margin-bottom: 16px; }
+    .mw-bpm-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+    .mw-bpm-label { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); }
+    
+    .mw-bpm-input {
+      width: 110px; padding: 6px 8px; border-radius: 999px; border: 1px solid #111827;
+      background: var(--track-bg); color: var(--text-main); font-size: 0.9rem; text-align: center; outline: none;
+    }
+
+    .mw-slider {
+      width: 100%; -webkit-appearance: none; appearance: none; height: 6px;
+      border-radius: 999px; background: var(--track-bg); outline: none;
+    }
+    .mw-slider::-webkit-slider-thumb {
+      -webkit-appearance: none; appearance: none; width: 16px; height: 16px; border-radius: 50%;
+      background: var(--thumb); border: 2px solid #fee2e2; cursor: pointer;
+      box-shadow: 0 0 0 4px rgba(248, 113, 113, 0.15);
+    }
+
+    .mw-play-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 6px; margin-bottom: 10px; }
+    
+    .mw-btn {
+      flex: 1; border: none; border-radius: 999px; padding: 8px 12px; font-size: 0.9rem; font-weight: 600; cursor: pointer;
+      background: var(--accent); color: #111827; display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+      transition: transform 0.08s ease, box-shadow 0.08s ease, background 0.2s;
+      box-shadow: 0 10px 22px rgba(252, 116, 50, 0.35);
+    }
+    .mw-btn:hover { transform: translateY(-1px); background: #f97316; box-shadow: 0 14px 30px rgba(252, 116, 50, 0.45); }
+    .mw-btn:active { transform: translateY(0); box-shadow: none; }
+
+    .mw-status { font-size: 0.75rem; color: var(--text-muted); text-align: right; }
+
+    .mw-visual { margin-top: 12px; display: flex; justify-content: center; align-items: center; gap: 16px; }
+    .mw-pendulum-track { width: 120px; height: 4px; border-radius: 999px; background: rgba(15, 23, 42, 0.9); position: relative; overflow: hidden; }
+    .mw-pendulum-ball {
+      width: 18px; height: 18px; border-radius: 50%; background: var(--accent); position: absolute; top: 50%;
+      transform: translate(-50%, -50%); left: 50%; box-shadow: 0 0 20px rgba(252, 116, 50, 0.9); transition: left 0.08s ease-out;
+    }
+
+    .mw-beat-circle {
+      width: 26px; height: 26px; border-radius: 50%; border: 2px solid rgba(148, 163, 184, 0.7);
+      display: flex; align-items: center; justify-content: center; font-size: 0.7rem; color: var(--text-muted);
+      position: relative; overflow: hidden;
+    }
+    .mw-beat-circle.active { border-color: var(--accent); color: var(--accent); }
+    .mw-beat-circle.accent { border-color: #facc15; color: #facc15; box-shadow: 0 0 18px rgba(250, 204, 21, 0.7); }
+
+    .mw-subdivision-strip { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    .mw-sub-btn {
+      width: 38px; height: 32px; border-radius: 10px; border: 1px solid #1f2937; background: #0b1120; color: #f9fafb;
+      display: flex; align-items: center; justify-content: center; font-size: 1rem; cursor: pointer; padding: 0;
+    }
+    .mw-sub-btn.active { background: #f9fafb; color: #111827; border-color: var(--accent); }
   </style>
 </head>
 <body>
-<p class="p1"><span class="s1">&lt;!DOCTYPE html&gt;</span></p>
-<p class="p1"><span class="s1">&lt;html lang="es"&gt;</span></p>
-<p class="p1"><span class="s1">&lt;head&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>&lt;meta charset="UTF-8"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>&lt;title&gt;METRONOMO ICZ&lt;/title&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>&lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>&lt;!-- Fuente (estilo ICZ) --&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>&lt;link rel="preconnect" href="https://fonts.googleapis.com"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>&lt;link rel="preconnect" href="https://fonts.gstatic.com" crossorigin&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>&lt;link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&amp;display=swap" rel="stylesheet"&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>&lt;style&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>:root {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>--bg: #020617;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>--card-bg: #020617;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>--card-border: #1f2937;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>--accent: #fc7432;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>--accent-soft: rgba(252, 116, 50, 0.25);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>--text-main: #f9fafb;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>--text-muted: #9ca3af;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>--track-bg: #111827;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>--thumb: #f97316;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>* {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>box-sizing: border-box;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>margin: 0;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>padding: 0;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>body {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>min-height: 100vh;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>display: flex;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>align-items: center;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>justify-content: center;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>background: radial-gradient(circle at top, #111827, #020617);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>font-family: "Montserrat", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>color: var(--text-main);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>.metronome-widget {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>background: var(--card-bg);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>border-radius: 24px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>padding: 20px 22px 18px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>width: 340px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>max-width: 100%;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>border: 1px solid var(--card-border);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>box-shadow:</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>0 20px 40px rgba(0, 0, 0, 0.7),</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>0 0 0 1px rgba(15, 23, 42, 0.8);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>.mw-header {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>display: flex;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>justify-content: flex-start;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>align-items: center;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>margin-bottom: 12px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>.mw-title-row {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>display: flex;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>align-items: center;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>gap: 10px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>.mw-logo {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>height: 24px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>width: auto;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>display: block;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>.mw-title {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>font-size: 1.25rem;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>font-weight: 700;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>letter-spacing: 0.06em;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>text-transform: uppercase;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>text-align: left;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>white-space: nowrap;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>.mw-display {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>display: flex;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>align-items: baseline;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>gap: 6px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>margin-bottom: 14px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>.mw-bpm-value {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>font-size: 2.6rem;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>font-weight: 700;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>line-height: 1;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>.mw-bpm-unit {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>font-size: 0.9rem;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>color: var(--text-muted);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>text-transform: uppercase;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>letter-spacing: 0.08em;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>.mw-bpm-controls {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>display: grid;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>gap: 8px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>margin-bottom: 16px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>.mw-bpm-row {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>display: flex;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>justify-content: space-between;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>align-items: center;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>gap: 8px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>.mw-bpm-label {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>font-size: 0.8rem;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>text-transform: uppercase;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>letter-spacing: 0.08em;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>color: var(--text-muted);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>.mw-bpm-input {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>width: 110px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>padding: 6px 8px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>border-radius: 999px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>border: 1px solid #111827;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>background: var(--track-bg);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>color: var(--text-main);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>font-size: 0.9rem;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>text-align: center;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>outline: none;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>.mw-bpm-input::-webkit-outer-spin-button,</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>.mw-bpm-input::-webkit-inner-spin-button {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>-webkit-appearance: none;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>margin: 0;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>.mw-bpm-input[type=number] {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>-moz-appearance: textfield;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>.mw-slider {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>width: 100%;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>-webkit-appearance: none;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>appearance: none;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>height: 6px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>border-radius: 999px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>background: var(--track-bg);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>outline: none;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>.mw-slider::-webkit-slider-thumb {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>-webkit-appearance: none;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>appearance: none;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>width: 16px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>height: 16px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>border-radius: 50%;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>background: var(--thumb);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>border: 2px solid #fee2e2;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>cursor: pointer;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>box-shadow: 0 0 0 4px rgba(248, 113, 113, 0.15);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>.mw-slider::-moz-range-thumb {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>width: 16px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>height: 16px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>border-radius: 50%;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>background: var(--thumb);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>border: 2px solid #fee2e2;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>cursor: pointer;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>box-shadow: 0 0 0 4px rgba(248, 113, 113, 0.15);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>.mw-play-row {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>display: flex;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>align-items: center;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>justify-content: space-between;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>gap: 10px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>margin-top: 6px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>margin-bottom: 10px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>.mw-btn {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>flex: 1;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>border: none;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>border-radius: 999px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>padding: 8px 12px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>font-size: 0.9rem;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>font-weight: 600;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>cursor: pointer;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>background: var(--accent);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>color: #111827;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>display: inline-flex;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>align-items: center;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>justify-content: center;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>gap: 6px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>transition: transform 0.08s ease, box-shadow 0.08s ease, background 0.2s;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>box-shadow: 0 10px 22px rgba(252, 116, 50, 0.35);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>.mw-btn:hover {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>transform: translateY(-1px);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>box-shadow: 0 14px 30px rgba(252, 116, 50, 0.45);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>background: #f97316;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>.mw-btn:active {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>transform: translateY(0);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>box-shadow: none;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>.mw-btn-icon {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>font-size: 1rem;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>.mw-status {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>font-size: 0.75rem;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>color: var(--text-muted);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>text-align: right;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>.mw-visual {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>margin-top: 12px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>display: flex;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>justify-content: center;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>align-items: center;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>gap: 16px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>.mw-pendulum-track {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>width: 120px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>height: 4px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>border-radius: 999px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>background: rgba(15, 23, 42, 0.9);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>position: relative;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>overflow: hidden;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>.mw-pendulum-ball {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>width: 18px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>height: 18px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>border-radius: 50%;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>background: var(--accent);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>position: absolute;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>top: 50%;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>transform: translate(-50%, -50%);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>left: 50%;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>box-shadow: 0 0 20px rgba(252, 116, 50, 0.9);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>transition: left 0.08s ease-out;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>.mw-beat-circle {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>width: 26px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>height: 26px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>border-radius: 50%;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>border: 2px solid rgba(148, 163, 184, 0.7);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>display: flex;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>align-items: center;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>justify-content: center;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>font-size: 0.7rem;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>color: var(--text-muted);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>position: relative;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>overflow: hidden;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>.mw-beat-circle::before {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>content: "";</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>position: absolute;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>inset: 0;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>border-radius: inherit;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>background: radial-gradient(circle, rgba(252, 116, 50, 0.35), transparent 70%);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>opacity: 0;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>transform: scale(0.5);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>transition: opacity 0.08s ease, transform 0.08s ease;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>.mw-beat-circle.active {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>border-color: var(--accent);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>color: var(--accent);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>.mw-beat-circle.active::before {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>opacity: 1;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>transform: scale(1.2);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>.mw-beat-circle.accent {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>border-color: #facc15;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>color: #facc15;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>box-shadow: 0 0 18px rgba(250, 204, 21, 0.7);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>/* Subdivisión: botones horizontales */</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>.mw-subdivision-strip {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>display: flex;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>align-items: center;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>gap: 6px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>flex-wrap: wrap;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>.mw-sub-btn {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>width: 38px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>height: 32px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>border-radius: 10px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>border: 1px solid #1f2937;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>background: #0b1120;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>color: #f9fafb;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>display: flex;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>align-items: center;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>justify-content: center;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>font-size: 1rem;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>cursor: pointer;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>transition: background 0.15s ease, border-color 0.15s ease, transform 0.08s ease;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>padding: 0;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>overflow: hidden;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>.mw-sub-btn span {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>display: inline-block;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>transform: translateY(1px);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>.mw-sub-btn img {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>max-width: 100%;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>max-height: 100%;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>display: block;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>.mw-sub-btn.active {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>background: #f9fafb;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>color: #111827;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>border-color: var(--accent);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>transform: translateY(-1px);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>box-shadow: 0 4px 10px rgba(15, 23, 42, 0.5);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>.mw-sub-btn:hover {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>border-color: var(--accent);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>@media (max-width: 400px) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>body {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>padding: 8px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>.metronome-widget {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>padding: 18px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>width: 100%;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>&lt;/style&gt;</span></p>
-<p class="p1"><span class="s1">&lt;/head&gt;</span></p>
-<p class="p1"><span class="s1">&lt;body&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>&lt;div class="metronome-widget"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;div class="mw-header"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>&lt;div class="mw-title-row"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;div class="mw-title"&gt;METRONOMO ICZ&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;!-- Logo a la derecha del título --&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;img</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">          </span>src="https://icz-desk.s3.us-west-2.amazonaws.com/userfiles/files/ZARIL6rNp3vhvjLLCwwbiAV0SG6X5Vvxn4rN7jPD.png"</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">          </span>alt="Instituto CanZion"</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">          </span>class="mw-logo"</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;div class="mw-display"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>&lt;div class="mw-bpm-value" id="bpm-display"&gt;100&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>&lt;div class="mw-bpm-unit"&gt;BPM&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;div class="mw-bpm-controls"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>&lt;div class="mw-bpm-row"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;span class="mw-bpm-label"&gt;Tempo&lt;/span&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;input</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">          </span>type="number"</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">          </span>id="bpm-input"</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">          </span>class="mw-bpm-input"</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">          </span>min="30"</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">          </span>max="260"</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">          </span>value="100"</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>&lt;input</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>type="range"</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>id="bpm-slider"</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>class="mw-slider"</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>min="30"</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>max="260"</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>value="100"</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>&lt;div class="mw-bpm-row"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;span class="mw-bpm-label"&gt;Compás&lt;/span&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;select id="time-signature" class="mw-bpm-input"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">          </span>&lt;option value="2"&gt;2/4&lt;/option&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">          </span>&lt;option value="3"&gt;3/4&lt;/option&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">          </span>&lt;option value="4" selected&gt;4/4&lt;/option&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">          </span>&lt;option value="6"&gt;6/8&lt;/option&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;/select&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>&lt;div class="mw-bpm-row"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;span class="mw-bpm-label"&gt;Subdivisión&lt;/span&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;div class="mw-subdivision-strip"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">          </span>&lt;!-- Negras --&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">          </span>&lt;button class="mw-sub-btn active" data-sub="1" title="Negras"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;span&gt;♩&lt;/span&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">          </span>&lt;/button&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">          </span>&lt;!-- Corcheas --&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">          </span>&lt;button class="mw-sub-btn" data-sub="2" title="Corcheas"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;span&gt;♪♪&lt;/span&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">          </span>&lt;/button&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">          </span>&lt;!-- Semicorcheas (♬) --&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">          </span>&lt;button class="mw-sub-btn" data-sub="4" title="Semicorcheas"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;span&gt;♬&lt;/span&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">          </span>&lt;/button&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">          </span>&lt;!-- Tresillos de corchea --&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">          </span>&lt;button class="mw-sub-btn" data-sub="3" title="Tresillos de corchea"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&lt;img</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">              </span>src="https://icz-desk.s3.us-west-2.amazonaws.com/userfiles/files/lELW1pXenhYj5Wwrju5yqzW6HhTQRN9Sd0lcd68E.png"</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">              </span>alt="Tresillos"</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">          </span>&lt;/button&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;div class="mw-play-row"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>&lt;button id="play-toggle" class="mw-btn"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;span class="mw-btn-icon" id="play-icon"&gt;▶&lt;/span&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;span id="play-label"&gt;Iniciar&lt;/span&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>&lt;/button&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>&lt;div class="mw-status" id="status-text"&gt;Listo&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;div class="mw-visual"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>&lt;div class="mw-pendulum-track"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;div class="mw-pendulum-ball" id="pendulum-ball"&gt;&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>&lt;div class="mw-beat-circle" id="beat-indicator"&gt;1&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>&lt;script&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>let audioCtx = null;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>let isPlaying = false;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>let tempo = 100;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const lookahead = 25;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const scheduleAheadTime = 0.1;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>let nextNoteTime = 0.0;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>let timerID = null;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>let swingSide = 1;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>let beatsPerMeasure = 4;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>let currentBeat = 0;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>// Subdivisiones: 1 = negras, 2 = corcheas, 3 = tresillos, 4 = semicorcheas</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>let subdivisionsPerBeat = 1;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>let currentSubInBeat = 0;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const bpmDisplay = document.getElementById("bpm-display");</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const bpmInput = document.getElementById("bpm-input");</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const bpmSlider = document.getElementById("bpm-slider");</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const playToggle = document.getElementById("play-toggle");</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const playIcon = document.getElementById("play-icon");</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const playLabel = document.getElementById("play-label");</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const statusText = document.getElementById("status-text");</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const pendulumBall = document.getElementById("pendulum-ball");</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const beatIndicator = document.getElementById("beat-indicator");</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const timeSigSelect = document.getElementById("time-signature");</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const subButtons = document.querySelectorAll(".mw-sub-btn");</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>function updateBpm(newValue) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>const value = Math.min(260, Math.max(30, Number(newValue) || tempo));</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>tempo = value;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>bpmDisplay.textContent = value;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>bpmInput.value = value;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>bpmSlider.value = value;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>if (isPlaying) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>statusText.textContent = `${tempo} BPM · Reproduciendo`;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>} else {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>statusText.textContent = `Listo a ${tempo} BPM`;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>bpmInput.addEventListener("input", e =&gt; updateBpm(e.target.value));</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>bpmSlider.addEventListener("input", e =&gt; updateBpm(e.target.value));</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>function updateTimeSignature(value) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>let top = parseInt(value, 10);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>if (![2, 3, 4, 6].includes(top)) top = 4;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>beatsPerMeasure = top;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>currentBeat = 0;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>currentSubInBeat = 0;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>beatIndicator.textContent = "1";</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>beatIndicator.classList.remove("accent", "active");</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>timeSigSelect.addEventListener("change", e =&gt; {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>updateTimeSignature(e.target.value);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>});</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>function setSubdivision(newSub) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>subdivisionsPerBeat = newSub;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>currentSubInBeat = 0;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>subButtons.forEach(btn =&gt; {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>const subVal = parseInt(btn.getAttribute("data-sub"), 10);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>if (subVal === newSub) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">          </span>btn.classList.add("active");</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>} else {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">          </span>btn.classList.remove("active");</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>});</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>subButtons.forEach(btn =&gt; {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>btn.addEventListener("click", () =&gt; {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>const val = parseInt(btn.getAttribute("data-sub"), 10);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>if (val === subdivisionsPerBeat) return;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>setSubdivision(val);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>});</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>});</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>function nextNote() {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>const secondsPerBeat = 60.0 / tempo;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>const secondsPerSub = secondsPerBeat / subdivisionsPerBeat;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>nextNoteTime += secondsPerSub;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>function scheduleClick(time, beatNumber, isMainBeat) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>if (!audioCtx) return;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>const isAccent = isMainBeat &amp;&amp; (beatNumber === 1);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>const isMainNonAccent = isMainBeat &amp;&amp; !isAccent;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>const osc = audioCtx.createOscillator();</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>const gain = audioCtx.createGain();</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>let freq;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>if (isAccent) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>freq = 1500;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>} else if (isMainNonAccent) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>freq = 1000;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>} else {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>freq = 750;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>osc.frequency.value = freq;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>let baseGain = isAccent ? 1.0 : (isMainNonAccent ? 0.8 : 0.5);</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>gain.gain.setValueAtTime(0.0, time);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>gain.gain.linearRampToValueAtTime(baseGain, time + 0.001);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>gain.gain.exponentialRampToValueAtTime(0.001, time + 0.08);</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>osc.connect(gain);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>gain.connect(audioCtx.destination);</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>osc.start(time);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>osc.stop(time + 0.1);</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>const now = audioCtx.currentTime;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>const delayMs = Math.max(0, (time - now) * 1000);</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>setTimeout(() =&gt; {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>swingSide *= -1;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>const leftPos = swingSide === 1 ? 15 : 85;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>pendulumBall.style.left = leftPos + "%";</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>if (isMainBeat) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">          </span>beatIndicator.textContent = beatNumber;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">          </span>beatIndicator.classList.add("active");</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">          </span>if (isAccent) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>beatIndicator.classList.add("accent");</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">          </span>} else {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>beatIndicator.classList.remove("accent");</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">          </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">          </span>setTimeout(() =&gt; {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>beatIndicator.classList.remove("active");</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">          </span>}, 80);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>}, delayMs);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>function scheduler() {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>while (nextNoteTime &lt; audioCtx.currentTime + scheduleAheadTime) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>const isMainBeat = (currentSubInBeat === 0);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>let beatNumber;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>if (isMainBeat) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">          </span>beatNumber = (currentBeat % beatsPerMeasure) + 1;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>} else {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">          </span>beatNumber = currentBeat === 0 ? 1 : currentBeat;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>scheduleClick(nextNoteTime, beatNumber, isMainBeat);</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>currentSubInBeat++;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>if (currentSubInBeat &gt;= subdivisionsPerBeat) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">          </span>currentSubInBeat = 0;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">          </span>currentBeat = beatNumber;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>nextNote();</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>timerID = window.setTimeout(scheduler, lookahead);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>function toggleMetronome() {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>if (!audioCtx) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>audioCtx = new (window.AudioContext || window.webkitAudioContext)();</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>if (!isPlaying) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>isPlaying = true;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>currentBeat = 0;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>currentSubInBeat = 0;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>nextNoteTime = audioCtx.currentTime + 0.05;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>swingSide = 1;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>scheduler();</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>playIcon.textContent = "■";</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>playLabel.textContent = "Detener";</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>statusText.textContent = `${tempo} BPM · Reproduciendo`;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>} else {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>isPlaying = false;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>window.clearTimeout(timerID);</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>playIcon.textContent = "▶";</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>playLabel.textContent = "Iniciar";</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>statusText.textContent = `Listo a ${tempo} BPM`;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>playToggle.addEventListener("click", toggleMetronome);</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>// Estado inicial</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>updateBpm(tempo);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>updateTimeSignature(timeSigSelect.value);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>setSubdivision(1);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>&lt;/script&gt;</span></p>
-<p class="p1"><span class="s1">&lt;/body&gt;</span></p>
-<p class="p1"><span class="s1">&lt;/html&gt;</span></p>
+  <div class="metronome-widget">
+    <div class="mw-header">
+      <div class="mw-title-row">
+        <div class="mw-title">METRONOMO ICZ</div>
+        <img src="https://icz-desk.s3.us-west-2.amazonaws.com/userfiles/files/ZARIL6rNp3vhvjLLCwwbiAV0SG6X5Vvxn4rN7jPD.png" alt="Instituto CanZion" class="mw-logo">
+      </div>
+    </div>
+
+    <div class="mw-display">
+      <div class="mw-bpm-value" id="bpm-display">100</div>
+      <div class="mw-bpm-unit">BPM</div>
+    </div>
+
+    <div class="mw-bpm-controls">
+      <div class="mw-bpm-row">
+        <span class="mw-bpm-label">Tempo</span>
+        <input type="number" id="bpm-input" class="mw-bpm-input" min="30" max="260" value="100">
+      </div>
+      <input type="range" id="bpm-slider" class="mw-slider" min="30" max="260" value="100">
+
+      <div class="mw-bpm-row">
+        <span class="mw-bpm-label">Compás</span>
+        <select id="time-signature" class="mw-bpm-input">
+          <option value="2">2/4</option>
+          <option value="3">3/4</option>
+          <option value="4" selected>4/4</option>
+          <option value="6">6/8</option>
+        </select>
+      </div>
+
+      <div class="mw-bpm-row">
+        <span class="mw-bpm-label">Subdivisión</span>
+        <div class="mw-subdivision-strip">
+          <button class="mw-sub-btn active" data-sub="1" title="Negras"><span>♩</span></button>
+          <button class="mw-sub-btn" data-sub="2" title="Corcheas"><span>♪♪</span></button>
+          <button class="mw-sub-btn" data-sub="4" title="Semicorcheas"><span>♬</span></button>
+          <button class="mw-sub-btn" data-sub="3" title="Tresillos de corchea">
+             <span style="font-size: 0.8em">3</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="mw-play-row">
+      <button id="play-toggle" class="mw-btn">
+        <span class="mw-btn-icon" id="play-icon">▶</span>
+        <span id="play-label">Iniciar</span>
+      </button>
+      <div class="mw-status" id="status-text">Listo</div>
+    </div>
+
+    <div class="mw-visual">
+      <div class="mw-pendulum-track">
+        <div class="mw-pendulum-ball" id="pendulum-ball"></div>
+      </div>
+      <div class="mw-beat-circle" id="beat-indicator">1</div>
+    </div>
+  </div>
+
+  <script>
+    let audioCtx = null;
+    let isPlaying = false;
+    let tempo = 100;
+    const lookahead = 25;
+    const scheduleAheadTime = 0.1;
+    let nextNoteTime = 0.0;
+    let timerID = null;
+    let swingSide = 1;
+    let beatsPerMeasure = 4;
+    let currentBeat = 0;
+    let subdivisionsPerBeat = 1;
+    let currentSubInBeat = 0;
+
+    const bpmDisplay = document.getElementById("bpm-display");
+    const bpmInput = document.getElementById("bpm-input");
+    const bpmSlider = document.getElementById("bpm-slider");
+    const playToggle = document.getElementById("play-toggle");
+    const playIcon = document.getElementById("play-icon");
+    const playLabel = document.getElementById("play-label");
+    const statusText = document.getElementById("status-text");
+    const pendulumBall = document.getElementById("pendulum-ball");
+    const beatIndicator = document.getElementById("beat-indicator");
+    const timeSigSelect = document.getElementById("time-signature");
+    const subButtons = document.querySelectorAll(".mw-sub-btn");
+
+    function updateBpm(newValue) {
+      const value = Math.min(260, Math.max(30, Number(newValue) || tempo));
+      tempo = value;
+      bpmDisplay.textContent = value;
+      bpmInput.value = value;
+      bpmSlider.value = value;
+      if (isPlaying) {
+        statusText.textContent = `${tempo} BPM · Reproduciendo`;
+      } else {
+        statusText.textContent = `Listo a ${tempo} BPM`;
+      }
+    }
+
+    bpmInput.addEventListener("input", e => updateBpm(e.target.value));
+    bpmSlider.addEventListener("input", e => updateBpm(e.target.value));
+
+    function updateTimeSignature(value) {
+      let top = parseInt(value, 10);
+      if (![2, 3, 4, 6].includes(top)) top = 4;
+      beatsPerMeasure = top;
+      currentBeat = 0;
+      currentSubInBeat = 0;
+      beatIndicator.textContent = "1";
+      beatIndicator.classList.remove("accent", "active");
+    }
+
+    timeSigSelect.addEventListener("change", e => updateTimeSignature(e.target.value));
+
+    function setSubdivision(newSub) {
+      subdivisionsPerBeat = newSub;
+      currentSubInBeat = 0;
+      subButtons.forEach(btn => {
+        const subVal = parseInt(btn.getAttribute("data-sub"), 10);
+        if (subVal === newSub) btn.classList.add("active");
+        else btn.classList.remove("active");
+      });
+    }
+
+    subButtons.forEach(btn => {
+      btn.addEventListener("click", () => {
+        const val = parseInt(btn.getAttribute("data-sub"), 10);
+        if (val !== subdivisionsPerBeat) setSubdivision(val);
+      });
+    });
+
+    function nextNote() {
+      const secondsPerBeat = 60.0 / tempo;
+      const secondsPerSub = secondsPerBeat / subdivisionsPerBeat;
+      nextNoteTime += secondsPerSub;
+    }
+
+    function scheduleClick(time, beatNumber, isMainBeat) {
+      if (!audioCtx) return;
+      const isAccent = isMainBeat && (beatNumber === 1);
+      const isMainNonAccent = isMainBeat && !isAccent;
+      
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      
+      let freq = isAccent ? 1500 : (isMainNonAccent ? 1000 : 750);
+      osc.frequency.value = freq;
+      
+      let baseGain = isAccent ? 1.0 : (isMainNonAccent ? 0.8 : 0.5);
+      gain.gain.setValueAtTime(0.0, time);
+      gain.gain.linearRampToValueAtTime(baseGain, time + 0.001);
+      gain.gain.exponentialRampToValueAtTime(0.001, time + 0.08);
+      
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start(time);
+      osc.stop(time + 0.1);
+
+      const now = audioCtx.currentTime;
+      const delayMs = Math.max(0, (time - now) * 1000);
+      
+      setTimeout(() => {
+        swingSide *= -1;
+        const leftPos = swingSide === 1 ? 15 : 85;
+        pendulumBall.style.left = leftPos + "%";
+        
+        if (isMainBeat) {
+          beatIndicator.textContent = beatNumber;
+          beatIndicator.classList.add("active");
+          if (isAccent) beatIndicator.classList.add("accent");
+          else beatIndicator.classList.remove("accent");
+          setTimeout(() => beatIndicator.classList.remove("active"), 80);
+        }
+      }, delayMs);
+    }
+
+    function scheduler() {
+      while (nextNoteTime < audioCtx.currentTime + scheduleAheadTime) {
+        const isMainBeat = (currentSubInBeat === 0);
+        let beatNumber;
+        if (isMainBeat) {
+          beatNumber = (currentBeat % beatsPerMeasure) + 1;
+        } else {
+          beatNumber = currentBeat === 0 ? 1 : currentBeat;
+        }
+        scheduleClick(nextNoteTime, beatNumber, isMainBeat);
+        currentSubInBeat++;
+        if (currentSubInBeat >= subdivisionsPerBeat) {
+          currentSubInBeat = 0;
+          currentBeat = beatNumber;
+        }
+        nextNote();
+      }
+      timerID = window.setTimeout(scheduler, lookahead);
+    }
+
+    function toggleMetronome() {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (!isPlaying) {
+        isPlaying = true;
+        currentBeat = 0;
+        currentSubInBeat = 0;
+        nextNoteTime = audioCtx.currentTime + 0.05;
+        swingSide = 1;
+        scheduler();
+        playIcon.textContent = "■";
+        playLabel.textContent = "Detener";
+        statusText.textContent = `${tempo} BPM · Reproduciendo`;
+      } else {
+        isPlaying = false;
+        window.clearTimeout(timerID);
+        playIcon.textContent = "▶";
+        playLabel.textContent = "Iniciar";
+        statusText.textContent = `Listo a ${tempo} BPM`;
+      }
+    }
+    playToggle.addEventListener("click", toggleMetronome);
+  </script>
 </body>
 </html>
